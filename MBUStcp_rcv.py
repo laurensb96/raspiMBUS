@@ -16,11 +16,17 @@ bus = can.interface.Bus(bustype='kvaser', channel='0', bitrate=500000)
 
 while 1:
     msg = conn.recv(BUFFER_SIZE)
-    print(msg)
-    can_arb = (msg[1] << 16) + (msg[2] << 8) + msg[3]
+
+    CMD = msg[1]
+    can_arb = msg[1:4] # arbitration field = CMD + hash code
     DLC = msg[4]
     can_data = msg[5:5+DLC]
-    canMsg = can.Message(arbitration_id=can_arb,
+
+    if CMD == 0x16:
+        print('Switch accessory #:', msg[8], 'to state:', msg[9])
+    if CMD == 0x00 and DLC == 8:
+        print('Time =', msg[10], ':', msg[11], '(hr:min)')
+    canMsg = can.Message(arbitration_id=int.from_bytes(can_arb, byteorder='big'),
                          data=can_data,
                          is_extended_id=True)
     bus.send(canMsg)

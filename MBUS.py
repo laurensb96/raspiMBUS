@@ -12,7 +12,13 @@ s.listen(1)
 conn, address = s.accept()
 print('Connection address:', address)
 
-bus = can.interface.Bus(bustype='kvaser', channel='0', bitrate=500000)
+bus = can.interface.Bus(bustype='kvaser', channel='0', bitrate=250000)
+
+def closeTCP():
+    conn.close()
+
+def closeCAN():
+    bus.shutdown()
 
 class MBUS:
     cmd = 0
